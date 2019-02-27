@@ -71,51 +71,36 @@ class Application extends Config {
 
         $errors = [];                                  //Отсутствие ошибок
 
-      /**
-       *
-       */
-      if (empty($data['name'])) {
-        $errors = ['name' => 'empty'];
-      } elseif (empty($data['phone'])) {
-        $errors = ['phone' => 'empty'];
-      } elseif (strlen($data['name'])>64){
-        $errors = ['name' => 'large field'];
-      } elseif (!preg_match('/^[a-zA-Z]*$/', $data['name'])){
-        $errors = ['name' => 'field with number'];
-      } elseif (!preg_match('^\+\d{2}\(0\d{2}\)\d{3}\-\d{2}\-\d{2}$', $data['phone'])) {
-        $errors = ['phone' => 'wrong format'];
-      } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-        $errors = ['email' => 'wrong format'];
-      } elseif (!empty($data['email'])) {
-        $errors = ['email' => 'not empty'];
-      } elseif (strlen($data['comment'])>1024 || ($data['comment'] !== htmlspecialchars($data['comment']))) {
-        $errors = ['comment' => 'wrong format'];
+      if (empty($data) || !is_array($data)) {
+        return ['result' => count($errors) === 0, 'error' => $errors];
       }
 
-
-      /**этот способ быстрее(switch лучше использовать), но может записать только 4 ошибки
-       * (можно еще с if совместить или использовать классы для валидации)
-       */
       foreach ($data as $key=>$value){
         switch ($data[$key]){
           case 'name':
-            if (empty($value) || strlen($value)>64 || !preg_match('/^[a-zA-Z]*$/', $value)){
-              $errors = ['name' => 'wrong format'];
+            if (empty($value)) {
+              $errors = ['name' => 'empty field'];
+            } elseif (strlen($value)>64){
+              $errors = ['name' => 'more then 64 symbols'];
+            } elseif (!preg_match('/^[a-zA-Z]*$/', $value)){
+              $errors = ['name' => 'field with number'];
             }
             break;
           case 'phone':
-            if (empty($value) || !preg_match('^\+\d{2}\(0\d{2}\)\d{3}\-\d{2}\-\d{2}$', $value)){
+            if (empty($value)) {
+              $errors = ['phone' => 'empty field'];
+            } elseif (!preg_match('^\+\d{2}\(0\d{2}\)\d{3}\-\d{2}\-\d{2}$', $value)) {
               $errors = ['phone' => 'wrong format'];
             }
             break;
           case 'email':
-            if (!empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)){
-              $errors = ['email' => 'wrong format'];
+            if (!empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+              $errors = ['email' => 'wrong format or not empty'];
             }
             break;
           case 'comment':
             if (strlen($value)>1024 || ($value !== htmlspecialchars($value))){
-              $errors = ['comment' => 'wrong format'];
+              $errors = ['comment' => 'wrong format or more then 1024 symbols'];
             }
         }
       }
