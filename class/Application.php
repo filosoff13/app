@@ -71,41 +71,45 @@ class Application extends Config {
 
         $errors = [];                                  //Отсутствие ошибок
 
-      if (empty($data) || !is_array($data)) {
-        return ['result' => count($errors) === 0, 'error' => $errors];
-      }
+//      if (empty($data) || !is_array($data)) {
+//        return ['result' => true, 'error' => $errors];
+//      }
 
       foreach ($data as $key=>$value){
-        switch ($data[$key]){
+        switch ($key) {
           case 'name':
             if (empty($value)) {
-              $errors = ['name' => 'empty field'];
+              $errors['name'] = 'empty field';
+
             } elseif (strlen($value)>64){
-              $errors = ['name' => 'more then 64 symbols'];
-            } elseif (!preg_match('/^[a-zA-Z]*$/', $value)){
-              $errors = ['name' => 'field with number'];
+              $errors['name'] =  'more then 64 symbols';
+
+            }
+            elseif (!preg_match('^[0-9]*', $value)){
+              $errors['name'] =  'field with number';
             }
             break;
           case 'phone':
             if (empty($value)) {
-              $errors = ['phone' => 'empty field'];
+              $errors['phone'] = 'empty field';
             } elseif (!preg_match('^\+\d{2}\(0\d{2}\)\d{3}\-\d{2}\-\d{2}$', $value)) {
-              $errors = ['phone' => 'wrong format'];
+              $errors['phone'] = 'wrong format';
             }
             break;
           case 'email':
-            if (!empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-              $errors = ['email' => 'wrong format or not empty'];
+            if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+              $errors['email'] = 'wrong format or not empty';
             }
             break;
           case 'comment':
             if (strlen($value)>1024 || ($value !== htmlspecialchars($value))){
-              $errors = ['comment' => 'wrong format or more then 1024 symbols'];
+              $errors['comment'] = 'wrong format or more then 1024 symbols';
             }
         }
       }
 
-        return ['result' => count($errors) === 0, 'error' => $errors];
+      $col = count($errors);
+        return ['result' => $col === 0, 'error' => $errors];
     }
 
 
